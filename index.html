@@ -192,18 +192,101 @@
         if (editIdx !== null) habits[editIdx] = h; else habits.push(h);
         closeModal(); render();
     }
+const NOTIFIED_KEY = "NOTIFIED_V1";
+let notified = JSON.parse(localStorage.getItem(NOTIFIED_KEY)) || {};
 
-    setInterval(() => {
-        const now = new Date();
-        const curT = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        if (now.getSeconds() === 0) {
-            habits.forEach(h => {
-                if (h.time === curT && (h.perm || h.date === now.toISOString().split('T')[0])) {
-                    navigator.serviceWorker.ready.then(reg => reg.showNotification("Пора!", {body: h.name}));
-                }
-            });
+function todayStr() {
+    return new Date().toISOString().split('T')[0];
+}
+
+function notify(title, body) {
+    if (Notification.permission !== 'granted') return;
+    navigator.serviceWorker.ready.then(reg => {
+        reg.showNotification(title, {
+            body,
+            vibrate: [200, 100, 200],
+            priority: 'high'
+        });
+    });
+}
+
+// Проверка пропущенных (при запуске / возврате в приложение)
+function checkMissed() {
+    const now = new Date();
+    const today = todayStr();
+
+    habits.forEach((h, id) => {
+        if (!h.time) return;
+        if (!(h.perm || h.date === today)) return;
+
+        const key = today + "_" + id;
+        if (notified[key]) return;
+
+        const [hh, mm] = h.time.split(":").map(Number);
+        const habitTime = new Date();
+        habitTime.setHours(hh, mm, 0, 0);
+
+        if (now >= habitTime) {
+            notify("Привычка", h.name);
+            notified[key] = true;
         }
-    }, 1000);
+    });
+
+    localStorage.setItem(NOTIFIED_KEY, JSON.stringify(notified));
+}
+
+// Планирование будущих уведомлений (пока приложение живо)
+function scheduleToday() {
+    const now = new Date();
+    const today = todayStr();
+
+    habits.forEach((h, id) => {
+        if (!h.time) return;
+        if (!(h.perm || h.date === today)) return;
+
+        const key = today + "_" + id;
+        if (notified[key]) return;
+
+        const [hh, mm] = h.time.split(":").map(Number);
+        const target = new Date();
+        target.setHours(hh, mm, 0, 0);
+
+        const delay = target - now;
+        if (delay <= 0) return;
+
+        setTimeout(() => {
+            notify("Пора!", h.name);
+            notified[key] = true;
+            localStorage.setItem(NOTIFIED_KEY, JSON.stringify(notified));
+        }, delay);
+    });
+}
+
+// Сброс на новый день
+function resetDayIfNeeded() {
+    const savedDay = localStorage.getItem("LAST_DAY");
+    const today = todayStr();
+    if (savedDay !== today) {
+        notified = {};
+        localStorage.setItem(NOTIFIED_KEY, "{}");
+        localStorage.setItem("LAST_DAY", today);
+    }
+}
+
+// ХУКИ
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+        resetDayIfNeeded();
+        checkMissed();
+        scheduleToday();
+    }
+});
+
+// ПЕРВЫЙ ЗАПУСК
+resetDayIfNeeded();
+checkMissed();
+scheduleToday();
+ 
 
     window.onclick = () => document.getElementById('ctx-menu').style.display = 'none';
     checkNotif();
