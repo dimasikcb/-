@@ -3,21 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Habit Tracker</title>
+    <title>Tracker</title>
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1067/1067530.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1067/1067530.png">
+    
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlRyYWNrZXIiLAogICJzaG9ydF9uYW1lIjogIlRyYWNrZXIiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzAwMDAwMCIsCiAgInRoZW1lX2NvbG9yIjogIzAwMDAwMCwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMTA2Ny8xMDY3NTMwLnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
+
     <style>
         :root { --bg: #000; --card: #1C1C1E; --accent: #0A84FF; --text: #fff; --gray: #8E8E93; --danger: #FF453A; }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 400px; }
         
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; width: 100%; }
-        .week-nav { display: flex; align-items: center; justify-content: space-between; background: var(--card); border-radius: 15px; padding: 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
+        /* Исправление прокрутки: фиксируем экран */
+        html, body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: -apple-system, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            height: 100%;
+            overflow: hidden; /* Запрет общей прокрутки */
+            overscroll-behavior: none; 
+        }
+
+        body { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 15px; 
+            box-sizing: border-box;
+        }
+
+        .container { 
+            width: 100%; 
+            max-width: 400px; 
+            display: flex; 
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; width: 100%; flex-shrink: 0; }
+        
+        .week-nav { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            background: var(--card); 
+            border-radius: 15px; 
+            padding: 10px; 
+            margin-bottom: 10px; 
+            width: 100%; 
+            box-sizing: border-box; 
+            flex-shrink: 0;
+        }
+
         .nav-btn { background: none; border: none; color: var(--accent); font-size: 20px; cursor: pointer; }
         
-        .days-row { display: flex; justify-content: space-between; background: var(--card); padding: 12px; border-radius: 18px; margin-bottom: 20px; width: 100%; box-sizing: border-box; }
+        .days-row { 
+            display: flex; 
+            justify-content: space-between; 
+            background: var(--card); 
+            padding: 12px; 
+            border-radius: 18px; 
+            margin-bottom: 20px; 
+            width: 100%; 
+            box-sizing: border-box; 
+            flex-shrink: 0;
+        }
+
         .day { text-align: center; color: var(--gray); cursor: pointer; flex: 1; }
         .day.selected { color: var(--accent); font-weight: bold; }
         .day-num { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 5px auto 0; }
         .selected .day-num { background: var(--accent); color: white; }
+
+        /* Список прокручивается только если задач действительно много */
+        #habit-list { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding-bottom: 20px;
+            scrollbar-width: none; /* Скрываем скроллбар для эстетики */
+        }
+        #habit-list::-webkit-scrollbar { display: none; }
 
         .habit-card { background: var(--card); margin-bottom: 10px; padding: 16px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; }
         .circle { width: 24px; height: 24px; border: 2px solid #3A3A3C; border-radius: 50%; cursor: pointer; flex-shrink: 0; }
@@ -76,9 +143,9 @@
 </div>
 
 <script>
-    const DB_KEY = "HABITS_FINAL_V16";
+    const DB_KEY = "HABITS_FINAL_V17";
     let habits = JSON.parse(localStorage.getItem(DB_KEY)) || [];
-    let doneData = JSON.parse(localStorage.getItem("DONE_V16")) || {};
+    let doneData = JSON.parse(localStorage.getItem("DONE_V17")) || {};
     let offset = 0, selected = new Date().toISOString().split('T')[0], editIdx = null;
 
     function render() {
@@ -109,7 +176,7 @@
             </div>`;
         }).join('');
         localStorage.setItem(DB_KEY, JSON.stringify(habits));
-        localStorage.setItem("DONE_V16", JSON.stringify(doneData));
+        localStorage.setItem("DONE_V17", JSON.stringify(doneData));
     }
 
     function toggle(id) { doneData[selected+'_'+id] = !doneData[selected+'_'+id]; render(); }
