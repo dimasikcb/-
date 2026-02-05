@@ -3,129 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Habit Tracker Ultra</title>
+    <title>Habit Tracker Elite</title>
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkhhYml0IFRyYWNrZXIiLAogICJzaG9ydF9uYW1lIjogIkhhYml0cyIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDAwMDAwIiwKICAidGhlbWVfY29sb3IiOiAiIzBhODRmZiIKfQ==">
     <style>
         :root { --bg: #000; --card: #1C1C1E; --accent: #0A84FF; --text: #fff; --gray: #8E8E93; --danger: #FF453A; }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
         .container { width: 100%; max-width: 400px; }
-        
-        .status-bar { font-size: 11px; padding: 10px; border-radius: 12px; margin-bottom: 15px; text-align: center; width: 100%; box-sizing: border-box; font-weight: bold; }
-        .status-ok { background: #28a74522; color: #28a745; border: 1px solid #28a74544; }
-        .status-err { background: #ff453a22; color: #ff453a; cursor: pointer; border: 1px solid #ff453a44; }
-
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; width: 100%; }
-        .week-nav { display: flex; align-items: center; justify-content: space-between; background: var(--card); border-radius: 15px; padding: 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
-        .nav-btn { background: none; border: none; color: var(--accent); font-size: 20px; cursor: pointer; padding: 5px 15px; }
-        
-        .days-row { display: flex; justify-content: space-between; background: var(--card); padding: 12px; border-radius: 18px; margin-bottom: 20px; width: 100%; box-sizing: border-box; }
-        .day { text-align: center; color: var(--gray); cursor: pointer; flex: 1; transition: 0.2s; }
+        .status-bar { font-size: 11px; padding: 10px; border-radius: 12px; margin-bottom: 15px; text-align: center; width: 100%; box-sizing: border-box; font-weight: bold; border: 1px solid transparent; }
+        .status-ok { background: #28a74522; color: #28a745; border-color: #28a74544; }
+        .status-err { background: #ff453a22; color: #ff453a; border-color: #ff453a44; cursor: pointer; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .week-nav { display: flex; align-items: center; justify-content: space-between; background: var(--card); border-radius: 15px; padding: 10px; margin-bottom: 10px; }
+        .days-row { display: flex; justify-content: space-between; background: var(--card); padding: 12px; border-radius: 18px; margin-bottom: 20px; }
+        .day { text-align: center; color: var(--gray); cursor: pointer; flex: 1; }
         .day.selected { color: var(--accent); font-weight: bold; }
         .day-num { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 5px auto 0; }
         .selected .day-num { background: var(--accent); color: white; }
-
-        .habit-card { background: var(--card); margin-bottom: 10px; padding: 16px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #2C2C2E; }
-        .circle { width: 24px; height: 24px; border: 2px solid #3A3A3C; border-radius: 50%; cursor: pointer; flex-shrink: 0; }
+        .habit-card { background: var(--card); margin-bottom: 10px; padding: 16px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; }
+        .circle { width: 24px; height: 24px; border: 2px solid #3A3A3C; border-radius: 50%; cursor: pointer; }
         .completed .circle { background: var(--accent); border-color: var(--accent); position: relative; }
         .completed .circle::after { content: "✓"; color: white; position: absolute; left: 5px; top: 0px; font-size: 14px; }
         .completed .name { text-decoration: line-through; color: var(--gray); }
-        .more { padding: 10px; cursor: pointer; color: var(--gray); font-size: 20px; line-height: 1; }
-
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
-        .modal-content { background: #2C2C2E; padding: 25px; border-radius: 25px; width: 100%; max-width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input { width: 100%; padding: 14px; background: #3A3A3C; border: none; border-radius: 12px; color: white; margin: 10px 0; box-sizing: border-box; font-size: 16px; outline: none; }
-        
-        button { cursor: pointer; border: none; font-weight: bold; }
-        .add-btn { background: var(--accent); color: white; width: 44px; height: 44px; border-radius: 50%; font-size: 24px; display: flex; align-items: center; justify-content: center; }
-        .save-btn { background: var(--accent); color: white; width: 100%; padding: 15px; border-radius: 14px; margin-top: 10px; font-size: 16px; }
-        
+        .modal-content { background: #2C2C2E; padding: 25px; border-radius: 25px; width: 100%; max-width: 300px; }
+        input, .btn-del { width: 100%; padding: 14px; border-radius: 12px; border: none; margin: 8px 0; font-size: 16px; box-sizing: border-box; }
+        input { background: #3A3A3C; color: white; outline: none; }
+        button { cursor: pointer; font-weight: bold; }
+        .add-btn { background: var(--accent); color: white; width: 44px; height: 44px; border-radius: 50%; font-size: 24px; display: flex; align-items: center; justify-content: center; border: none; }
+        .save-btn { background: var(--accent); color: white; width: 100%; padding: 15px; border-radius: 14px; margin-top: 10px; border: none; }
+        .btn-del { background: #3A3A3C; color: white; text-align: left; cursor: pointer; }
         .ctx-menu { display: none; position: fixed; background: #2C2C2E; border-radius: 14px; border: 1px solid #3A3A3C; z-index: 2000; min-width: 150px; box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
-        .menu-item { padding: 14px 18px; color: white; cursor: pointer; border-bottom: 1px solid #3A3A3C; font-size: 15px; }
-        .menu-item:last-child { border-bottom: none; }
+        .menu-item { padding: 14px 18px; color: white; cursor: pointer; border-bottom: 1px solid #3A3A3C; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="notif-bar" class="status-bar status-err" onclick="checkNotif()">
-        Проверка системы уведомлений...
-    </div>
-
+    <div id="notif-bar" class="status-bar status-err" onclick="checkNotif()">Проверка уведомлений...</div>
     <header>
-        <h1 style="font-size: 26px; margin: 0;">Трекер</h1>
+        <h1 style="margin:0">Трекер</h1>
         <div style="display:flex; gap:10px;">
-            <button onclick="testPush()" style="background:#333; color:#aaa; font-size:10px; padding:6px 10px; border-radius:8px; text-transform:uppercase;">Тест звука</button>
+            <button onclick="testPush()" style="background:#333; color:#aaa; font-size:10px; padding:6px 10px; border-radius:8px; border:none;">ТЕСТ (5с)</button>
             <button class="add-btn" onclick="openAdd()">+</button>
         </div>
     </header>
-
     <div class="week-nav">
-        <button class="nav-btn" onclick="moveWeek(-1)">❮</button>
+        <button onclick="moveWeek(-1)" style="background:none; border:none; color:var(--accent); font-size:20px; cursor:pointer;">❮</button>
         <div id="month-label" style="text-transform: capitalize;"></div>
-        <button class="nav-btn" onclick="moveWeek(1)">❯</button>
+        <button onclick="moveWeek(1)" style="background:none; border:none; color:var(--accent); font-size:20px; cursor:pointer;">❯</button>
     </div>
-
     <div class="days-row" id="days-row"></div>
     <div id="habit-list"></div>
 </div>
 
+<div id="del-modal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0">Как удалить?</h3>
+        <button class="btn-del" onclick="confirmDelete('forever')">🗑 Удалить навсегда</button>
+        <button class="btn-del" onclick="confirmDelete('today')">🗓 Только сегодня</button>
+        <button class="btn-del" onclick="confirmDelete('weekday')">📅 В этот день недели</button>
+        <button onclick="closeDel()" style="background:none; color:var(--gray); width:100%; margin-top:10px; border:none;">Отмена</button>
+    </div>
+</div>
+
 <div id="modal" class="modal">
     <div class="modal-content">
-        <h3 id="modal-title" style="margin:0 0 15px; color:var(--accent)">Привычка</h3>
-        <input type="text" id="h-name" placeholder="Что нужно сделать?">
-        <label style="display:flex; align-items:center; gap:10px; font-size:14px; color:var(--gray); cursor:pointer; margin: 5px 0;">
-            <input type="checkbox" id="h-perm"> Повторять ежедневно
+        <h3 id="modal-title" style="margin-top:0; color:var(--accent)">Привычка</h3>
+        <input type="text" id="h-name" placeholder="Название">
+        <label style="display:flex; align-items:center; gap:10px; font-size:14px; color:var(--gray); margin:10px 0;">
+            <input type="checkbox" id="h-perm"> Постоянная
         </label>
         <input type="time" id="h-time">
         <button class="save-btn" onclick="saveHabit()">Сохранить</button>
-        <button style="background:none; color:var(--gray); width:100%; margin-top:12px; font-size:14px;" onclick="closeModal()">Отмена</button>
+        <button onclick="closeModal()" style="background:none; color:var(--gray); width:100%; margin-top:10px; border:none;">Отмена</button>
     </div>
 </div>
 
 <div id="ctx-menu" class="ctx-menu">
-    <div class="menu-item" onclick="startEdit()">📝 Изменить</div>
-    <div class="menu-item" style="color:var(--danger);" onclick="deleteHabit()">🗑 Удалить</div>
+    <div class="menu-item" onclick="startEdit()">Изменить</div>
+    <div class="menu-item" style="color:var(--danger); border:none;" onclick="openDel()">Удалить</div>
 </div>
 
 <script>
-    // 1. УЛУЧШЕННЫЙ SERVICE WORKER
+    // 1. Усиленный Service Worker
     const swCode = `
         self.addEventListener('install', e => self.skipWaiting());
         self.addEventListener('activate', e => e.waitUntil(clients.claim()));
-        self.addEventListener('push', function(e) {
-            const data = e.data.json();
-            e.waitUntil(self.registration.showNotification(data.title, data));
+        self.addEventListener('push', e => {
+            const data = e.data ? e.data.json() : {title: 'Пора!', body: 'Привычка ждет'};
+            e.waitUntil(self.registration.showNotification(data.title, {
+                body: data.body,
+                vibrate: [200, 100, 200],
+                tag: 'habit-notif',
+                renotify: true
+            }));
         });
     `;
     const blob = new Blob([swCode], {type: 'application/javascript'});
-    const swUrl = URL.createObjectURL(blob);
-
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register(swUrl);
+        navigator.serviceWorker.register(URL.createObjectURL(blob));
     }
 
-    const DB_KEY = "HABITS_FINAL_V12";
+    const DB_KEY = "HABITS_V13";
     let habits = JSON.parse(localStorage.getItem(DB_KEY)) || [];
-    let doneData = JSON.parse(localStorage.getItem("DONE_V12")) || {};
+    let doneData = JSON.parse(localStorage.getItem("DONE_V13")) || {};
     let offset = 0, selected = new Date().toISOString().split('T')[0], editIdx = null;
 
     function checkNotif() {
-        if (!("Notification" in window)) {
-            updateBar("Ваш браузер не поддерживает уведомления", "status-err");
-            return;
-        }
         if (Notification.permission === "granted") {
-            updateBar("Уведомления настроены и активны ✓", "status-ok");
+            document.getElementById('notif-bar').className = "status-bar status-ok";
+            document.getElementById('notif-bar').innerText = "Уведомления активны ✓";
         } else {
-            Notification.requestPermission().then(p => {
-                if(p === "granted") updateBar("Уведомления успешно включены ✓", "status-ok");
-                else updateBar("Нажмите, чтобы дать разрешение на пуши", "status-err");
-            });
+            Notification.requestPermission().then(checkNotif);
         }
-    }
-
-    function updateBar(text, cls) {
-        const bar = document.getElementById('notif-bar');
-        bar.innerText = text; bar.className = "status-bar " + cls;
     }
 
     function render() {
@@ -140,81 +130,82 @@
             </div>`;
         }
         const today = new Date().toISOString().split('T')[0];
-        const filtered = habits.filter(h => h.perm || h.date === selected);
-        document.getElementById('habit-list').innerHTML = filtered.length ? filtered.map(h => {
+        const dayOfWeek = new Date(selected).getDay();
+        const filtered = habits.filter(h => {
+            if (!h.perm) return h.date === selected;
+            if (h.exDates && h.exDates.includes(selected)) return false;
+            if (h.exDays && h.exDays.includes(dayOfWeek)) return false;
+            return true;
+        });
+        document.getElementById('habit-list').innerHTML = filtered.map(h => {
             const id = habits.indexOf(h);
             const isDone = doneData[selected+'_'+id];
             return `<div class="habit-card ${isDone ? 'completed' : ''}">
-                <div style="display:flex;align-items:center;gap:12px;flex:1;cursor:pointer;" onclick="if('${selected}'<='${today}')toggle(${id})">
+                <div style="display:flex;align-items:center;gap:12px;flex:1" onclick="if('${selected}'<='${today}')toggle(${id})">
                     <div class="circle"></div>
-                    <div style="display:flex; flex-direction:column;">
+                    <div style="display:flex; flex-direction:column">
                         <span class="name">${h.name}</span>
-                        <span style="font-size:11px; color:var(--gray); margin-top:2px;">${h.time ? '⏰ ' + h.time : 'Весь день'}</span>
+                        <span style="font-size:11px; color:var(--gray)">${h.time || 'Весь день'}</span>
                     </div>
                 </div>
-                <div class="more" onclick="showMenu(event, ${id})">⋮</div>
+                <div onclick="showMenu(event, ${id})" style="padding:10px; cursor:pointer; color:var(--gray)">⋮</div>
             </div>`;
-        }).join('') : `<div style="text-align:center; color:var(--gray); margin-top:40px;">Нет привычек на этот день</div>`;
+        }).join('');
         localStorage.setItem(DB_KEY, JSON.stringify(habits));
-        localStorage.setItem("DONE_V12", JSON.stringify(doneData));
+        localStorage.setItem("DONE_V13", JSON.stringify(doneData));
     }
 
     function testPush() {
-        alert("Проверка! Сейчас закрой приложение или заблокируй экран. Через 5 сек придет пуш.");
+        alert("Закрой приложение! Пуш придет через 5 секунд.");
         setTimeout(() => {
-            sendNotification("Проверка звука 🔊", "Если ты слышишь это, всё работает отлично!");
-        }, 5000);
-    }
-
-    function sendNotification(title, body) {
-        if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(reg => {
-                reg.showNotification(title, {
-                    body: body,
-                    icon: 'https://cdn-icons-png.flaticon.com/512/1067/1067530.png',
-                    vibrate: [300, 100, 300], // Вибрация для привлечения внимания
-                    badge: 'https://cdn-icons-png.flaticon.com/512/1067/1067530.png',
-                    tag: 'habit-alert',
-                    renotify: true,
-                    requireInteraction: true // Уведомление не исчезнет само
+            if (Notification.permission === 'granted') {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification("Проверка звука!", { body: "Если видишь это — пуши работают!", vibrate: [300, 100, 300] });
                 });
-            });
-        }
+            }
+        }, 5000);
     }
 
     function toggle(id) { doneData[selected+'_'+id] = !doneData[selected+'_'+id]; render(); }
     function moveWeek(n) { offset += n; render(); }
-    function openAdd() { editIdx = null; document.getElementById('h-name').value=''; document.getElementById('h-perm').checked=false; document.getElementById('h-time').value=''; document.getElementById('modal').style.display='flex'; }
+    function openAdd() { editIdx = null; document.getElementById('h-name').value=''; document.getElementById('modal').style.display='flex'; }
     function closeModal() { document.getElementById('modal').style.display='none'; }
     function showMenu(e, id) { e.stopPropagation(); editIdx = id; const m = document.getElementById('ctx-menu'); m.style.display='block'; m.style.left=(e.pageX-140)+'px'; m.style.top=e.pageY+'px'; }
-    
     function startEdit() { 
-        const h = habits[editIdx]; 
-        document.getElementById('h-name').value = h.name; 
-        document.getElementById('h-perm').checked = h.perm; 
-        document.getElementById('h-time').value = h.time || ''; 
-        document.getElementById('modal').style.display='flex'; 
-        document.getElementById('ctx-menu').style.display='none'; 
+        const h = habits[editIdx];
+        document.getElementById('h-name').value = h.name;
+        document.getElementById('h-perm').checked = h.perm;
+        document.getElementById('h-time').value = h.time || '';
+        document.getElementById('modal').style.display='flex';
     }
-    
-    function deleteHabit() { habits.splice(editIdx, 1); render(); document.getElementById('ctx-menu').style.display='none'; }
+    function openDel() { document.getElementById('ctx-menu').style.display='none'; document.getElementById('del-modal').style.display='flex'; }
+    function closeDel() { document.getElementById('del-modal').style.display='none'; }
+
+    function confirmDelete(type) {
+        const h = habits[editIdx];
+        if (type === 'forever') habits.splice(editIdx, 1);
+        else if (type === 'today') { h.exDates = h.exDates || []; h.exDates.push(selected); }
+        else if (type === 'weekday') { h.exDays = h.exDays || []; h.exDays.push(new Date(selected).getDay()); }
+        closeDel(); render();
+    }
 
     function saveHabit() {
         const h = { name: document.getElementById('h-name').value, perm: document.getElementById('h-perm').checked, time: document.getElementById('h-time').value, date: selected };
-        if (!h.name) return;
-        if (editIdx !== null) habits[editIdx] = h; else habits.push(h);
+        if (editIdx !== null) habits[editIdx] = {...habits[editIdx], ...h};
+        else habits.push(h);
         closeModal(); render();
     }
 
     setInterval(() => {
         const now = new Date();
         const curT = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        if (now.getSeconds() !== 0) return;
-        habits.forEach(h => {
-            if (h.time === curT && (h.perm || h.date === now.toISOString().split('T')[0])) {
-                sendNotification("Пора действовать! 🚀", h.name);
-            }
-        });
+        if (now.getSeconds() === 0) {
+            habits.forEach(h => {
+                if (h.time === curT && (h.perm || h.date === now.toISOString().split('T')[0])) {
+                    navigator.serviceWorker.ready.then(reg => reg.showNotification("Пора!", {body: h.name, vibrate: [300, 100, 300]}));
+                }
+            });
+        }
     }, 1000);
 
     window.onclick = () => document.getElementById('ctx-menu').style.display = 'none';
