@@ -4,17 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Habit Tracker</title>
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlRyYWNrZXIiLAogICJzaG9ydF9uYW1lIjogIlRyYWNrZXIiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzAwMDAwMCIsCiAgInRoZW1lX2NvbG9yIjogIzBhODRmZiIKfQ==">
     <style>
         :root { --bg: #000; --card: #1C1C1E; --accent: #0A84FF; --text: #fff; --gray: #8E8E93; --danger: #FF453A; }
         body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .container { width: 100%; max-width: 400px; }
         
-        .status-bar { font-size: 11px; padding: 10px; border-radius: 12px; margin-bottom: 15px; text-align: center; width: 100%; box-sizing: border-box; font-weight: bold; }
-        .status-ok { background: #28a74522; color: #28a745; border: 1px solid #28a74544; }
-        .status-err { background: #ff453a22; color: #ff453a; border: 1px solid #ff453a44; cursor: pointer; }
-
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; width: 100%; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; width: 100%; }
         .week-nav { display: flex; align-items: center; justify-content: space-between; background: var(--card); border-radius: 15px; padding: 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
         .nav-btn { background: none; border: none; color: var(--accent); font-size: 20px; cursor: pointer; }
         
@@ -39,23 +34,17 @@
         .add-btn { background: var(--accent); color: white; width: 44px; height: 44px; border-radius: 50%; font-size: 24px; display: flex; align-items: center; justify-content: center; }
         .save-btn { background: var(--accent); color: white; width: 100%; padding: 14px; border-radius: 12px; margin-top: 10px; }
         
-        .ctx-menu { display: none; position: fixed; background: #2C2C2E; border-radius: 14px; border: 1px solid #3A3A3C; z-index: 2000; min-width: 150px; }
+        .ctx-menu { display: none; position: fixed; background: #2C2C2E; border-radius: 14px; border: 1px solid #3A3A3C; z-index: 2000; min-width: 150px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .menu-item { padding: 14px 18px; color: white; cursor: pointer; border-bottom: 1px solid #3A3A3C; }
+        .menu-item:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="notif-bar" class="status-bar status-err" onclick="checkNotif()">
-        Проверка уведомлений
-    </div>
-
     <header>
         <h1 style="font-size: 24px; margin: 0;">Трекер</h1>
-        <div style="display:flex; gap:10px;">
-            <button onclick="testPush()" style="background:#333; color:#aaa; font-size:10px; padding:6px 10px; border-radius:8px;">ТЕСТ</button>
-            <button class="add-btn" onclick="openAdd()">+</button>
-        </div>
+        <button class="add-btn" onclick="openAdd()">+</button>
     </header>
 
     <div class="week-nav">
@@ -83,38 +72,14 @@
 
 <div id="ctx-menu" class="ctx-menu">
     <div class="menu-item" onclick="startEdit()">Изменить</div>
-    <div class="menu-item" style="color:var(--danger); border:none;" onclick="deleteHabit()">Удалить</div>
+    <div class="menu-item" style="color:var(--danger);" onclick="deleteHabit()">Удалить</div>
 </div>
 
 <script>
-    const swCode = `
-        self.addEventListener('install', e => self.skipWaiting());
-        self.addEventListener('activate', e => e.waitUntil(clients.claim()));
-        self.addEventListener('push', e => {
-            const data = e.data ? e.data.json() : {title: 'Трекер', body: 'Пора выполнить задачу'};
-            e.waitUntil(self.registration.showNotification(data.title, {
-                body: data.body,
-                vibrate: [200, 100, 200],
-                priority: 'high'
-            }));
-        });
-    `;
-    const blob = new Blob([swCode], {type: 'application/javascript'});
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register(URL.createObjectURL(blob));
-
-    const DB_KEY = "HABITS_FINAL_V15";
+    const DB_KEY = "HABITS_FINAL_V16";
     let habits = JSON.parse(localStorage.getItem(DB_KEY)) || [];
-    let doneData = JSON.parse(localStorage.getItem("DONE_V15")) || {};
+    let doneData = JSON.parse(localStorage.getItem("DONE_V16")) || {};
     let offset = 0, selected = new Date().toISOString().split('T')[0], editIdx = null;
-
-    function checkNotif() {
-        if (Notification.permission === "granted") {
-            document.getElementById('notif-bar').className = "status-bar status-ok";
-            document.getElementById('notif-bar').innerText = "Уведомления активны";
-        } else {
-            Notification.requestPermission().then(checkNotif);
-        }
-    }
 
     function render() {
         const d = new Date(); d.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1) + (offset * 7));
@@ -144,22 +109,12 @@
             </div>`;
         }).join('');
         localStorage.setItem(DB_KEY, JSON.stringify(habits));
-        localStorage.setItem("DONE_V15", JSON.stringify(doneData));
-    }
-
-    function testPush() {
-        setTimeout(() => {
-            if (Notification.permission === 'granted') {
-                navigator.serviceWorker.ready.then(reg => {
-                    reg.showNotification("Тест", { body: "Уведомления работают", vibrate: [200, 100, 200] });
-                });
-            }
-        }, 3000);
+        localStorage.setItem("DONE_V16", JSON.stringify(doneData));
     }
 
     function toggle(id) { doneData[selected+'_'+id] = !doneData[selected+'_'+id]; render(); }
     function moveWeek(n) { offset += n; render(); }
-    function openAdd() { editIdx = null; document.getElementById('h-name').value=''; document.getElementById('h-time').value=''; document.getElementById('modal').style.display='flex'; }
+    function openAdd() { editIdx = null; document.getElementById('h-name').value=''; document.getElementById('h-time').value=''; document.getElementById('h-perm').checked=false; document.getElementById('modal').style.display='flex'; }
     function closeModal() { document.getElementById('modal').style.display='none'; }
     
     function showMenu(e, id) { 
@@ -192,104 +147,8 @@
         if (editIdx !== null) habits[editIdx] = h; else habits.push(h);
         closeModal(); render();
     }
-const NOTIFIED_KEY = "NOTIFIED_V1";
-let notified = JSON.parse(localStorage.getItem(NOTIFIED_KEY)) || {};
-
-function todayStr() {
-    return new Date().toISOString().split('T')[0];
-}
-
-function notify(title, body) {
-    if (Notification.permission !== 'granted') return;
-    navigator.serviceWorker.ready.then(reg => {
-        reg.showNotification(title, {
-            body,
-            vibrate: [200, 100, 200],
-            priority: 'high'
-        });
-    });
-}
-
-// Проверка пропущенных (при запуске / возврате в приложение)
-function checkMissed() {
-    const now = new Date();
-    const today = todayStr();
-
-    habits.forEach((h, id) => {
-        if (!h.time) return;
-        if (!(h.perm || h.date === today)) return;
-
-        const key = today + "_" + id;
-        if (notified[key]) return;
-
-        const [hh, mm] = h.time.split(":").map(Number);
-        const habitTime = new Date();
-        habitTime.setHours(hh, mm, 0, 0);
-
-        if (now >= habitTime) {
-            notify("Привычка", h.name);
-            notified[key] = true;
-        }
-    });
-
-    localStorage.setItem(NOTIFIED_KEY, JSON.stringify(notified));
-}
-
-// Планирование будущих уведомлений (пока приложение живо)
-function scheduleToday() {
-    const now = new Date();
-    const today = todayStr();
-
-    habits.forEach((h, id) => {
-        if (!h.time) return;
-        if (!(h.perm || h.date === today)) return;
-
-        const key = today + "_" + id;
-        if (notified[key]) return;
-
-        const [hh, mm] = h.time.split(":").map(Number);
-        const target = new Date();
-        target.setHours(hh, mm, 0, 0);
-
-        const delay = target - now;
-        if (delay <= 0) return;
-
-        setTimeout(() => {
-            notify("Пора!", h.name);
-            notified[key] = true;
-            localStorage.setItem(NOTIFIED_KEY, JSON.stringify(notified));
-        }, delay);
-    });
-}
-
-// Сброс на новый день
-function resetDayIfNeeded() {
-    const savedDay = localStorage.getItem("LAST_DAY");
-    const today = todayStr();
-    if (savedDay !== today) {
-        notified = {};
-        localStorage.setItem(NOTIFIED_KEY, "{}");
-        localStorage.setItem("LAST_DAY", today);
-    }
-}
-
-// ХУКИ
-document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-        resetDayIfNeeded();
-        checkMissed();
-        scheduleToday();
-    }
-});
-
-// ПЕРВЫЙ ЗАПУСК
-resetDayIfNeeded();
-checkMissed();
-scheduleToday();
- 
 
     window.onclick = () => document.getElementById('ctx-menu').style.display = 'none';
-    checkNotif();
     render();
 </script>
 </body>
