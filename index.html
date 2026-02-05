@@ -3,79 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tracker</title>
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlRyYWNrZXIiLAogICJzaG9ydF9uYW1lIjogIlRyYWNrZXIiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzAwMDAwMCIsCiAgInRoZW1lX2NvbG9yIjogIzAwMDAwMAp9">
+    <title>Habit Tracker</title>
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlRyYWNrZXIiLAogICJzaG9ydF9uYW1lIjogIlRyYWNrZXIiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzAwMDAwMCIsCiAgInRoZW1lX2NvbG9yIjogIzBhODRmZiIKfQ==">
     <style>
-        :root { --bg: #000; --card: #121212; --accent: #fff; --text: #fff; --gray: #555; --danger: #ff453a; }
+        :root { --bg: #000; --card: #1C1C1E; --accent: #0A84FF; --text: #fff; --gray: #8E8E93; --danger: #FF453A; }
         body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .container { width: 100%; max-width: 400px; }
         
-        .status-bar { font-size: 10px; padding: 5px; margin-bottom: 10px; text-align: center; width: 100%; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
-        .status-ok { color: #28a745; opacity: 0.5; }
-        .status-err { color: var(--danger); }
+        .status-bar { font-size: 11px; padding: 10px; border-radius: 12px; margin-bottom: 15px; text-align: center; width: 100%; box-sizing: border-box; font-weight: bold; }
+        .status-ok { background: #28a74522; color: #28a745; border: 1px solid #28a74544; }
+        .status-err { background: #ff453a22; color: #ff453a; border: 1px solid #ff453a44; cursor: pointer; }
 
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .week-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 10px; }
-        .nav-btn { background: none; border: none; color: var(--text); font-size: 18px; cursor: pointer; padding: 5px; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; width: 100%; }
+        .week-nav { display: flex; align-items: center; justify-content: space-between; background: var(--card); border-radius: 15px; padding: 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
+        .nav-btn { background: none; border: none; color: var(--accent); font-size: 20px; cursor: pointer; }
         
-        .days-row { display: flex; justify-content: space-between; margin-bottom: 25px; }
+        .days-row { display: flex; justify-content: space-between; background: var(--card); padding: 12px; border-radius: 18px; margin-bottom: 20px; width: 100%; box-sizing: border-box; }
         .day { text-align: center; color: var(--gray); cursor: pointer; flex: 1; }
-        .day.selected { color: var(--accent); }
-        .day-num { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 5px auto 0; font-size: 14px; }
-        .selected .day-num { background: var(--text); color: #000; }
+        .day.selected { color: var(--accent); font-weight: bold; }
+        .day-num { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 5px auto 0; }
+        .selected .day-num { background: var(--accent); color: white; }
 
-        .habit-card { background: var(--card); margin-bottom: 2px; padding: 18px; display: flex; align-items: center; justify-content: space-between; }
-        .circle { width: 20px; height: 20px; border: 1px solid #333; border-radius: 20%; cursor: pointer; }
-        .completed .circle { background: var(--accent); border-color: var(--accent); }
-        .completed .name { color: var(--gray); text-decoration: line-through; }
+        .habit-card { background: var(--card); margin-bottom: 10px; padding: 16px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; }
+        .circle { width: 24px; height: 24px; border: 2px solid #3A3A3C; border-radius: 50%; cursor: pointer; flex-shrink: 0; }
+        .completed .circle { background: var(--accent); border-color: var(--accent); position: relative; }
+        .completed .circle::after { content: "✓"; color: white; position: absolute; left: 5px; top: 0px; font-size: 14px; }
+        .completed .name { text-decoration: line-through; color: var(--gray); }
+        .more { padding: 5px 10px; cursor: pointer; color: var(--gray); font-size: 20px; }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+        .modal-content { background: #2C2C2E; padding: 25px; border-radius: 25px; width: 100%; max-width: 300px; }
+        input { width: 100%; padding: 12px; background: #3A3A3C; border: none; border-radius: 10px; color: white; margin: 10px 0; box-sizing: border-box; font-size: 16px; outline: none; }
         
-        .modal { display: none; position: fixed; inset: 0; background: #000; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { width: 100%; max-width: 300px; padding: 20px; }
-        input { width: 100%; padding: 15px 0; background: transparent; border: none; border-bottom: 1px solid #333; color: white; margin: 10px 0; font-size: 16px; outline: none; }
+        button { cursor: pointer; border: none; font-weight: 600; }
+        .add-btn { background: var(--accent); color: white; width: 44px; height: 44px; border-radius: 50%; font-size: 24px; display: flex; align-items: center; justify-content: center; }
+        .save-btn { background: var(--accent); color: white; width: 100%; padding: 14px; border-radius: 12px; margin-top: 10px; }
         
-        button { cursor: pointer; border: none; background: none; color: var(--text); font-family: inherit; }
-        .add-btn { font-size: 28px; line-height: 1; }
-        .save-btn { width: 100%; padding: 15px; border: 1px solid #333; margin-top: 20px; text-transform: uppercase; font-size: 12px; letter-spacing: 2px; }
-        
-        .ctx-menu { display: none; position: fixed; background: #111; border: 1px solid #222; z-index: 2000; min-width: 150px; }
-        .menu-item { padding: 15px; color: white; cursor: pointer; border-bottom: 1px solid #222; font-size: 13px; text-transform: uppercase; }
+        .ctx-menu { display: none; position: fixed; background: #2C2C2E; border-radius: 14px; border: 1px solid #3A3A3C; z-index: 2000; min-width: 150px; }
+        .menu-item { padding: 14px 18px; color: white; cursor: pointer; border-bottom: 1px solid #3A3A3C; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="notif-bar" class="status-bar status-err" onclick="checkNotif()">Push: Off</div>
+    <div id="notif-bar" class="status-bar status-err" onclick="checkNotif()">
+        Проверка уведомлений
+    </div>
+
     <header>
-        <h1 style="font-size: 20px; margin: 0; font-weight: 400; text-transform: uppercase; letter-spacing: 2px;">Задачи</h1>
-        <div style="display:flex; gap:15px; align-items:center;">
-            <button onclick="testPush()" style="font-size: 10px; color: var(--gray);">Test</button>
+        <h1 style="font-size: 24px; margin: 0;">Трекер</h1>
+        <div style="display:flex; gap:10px;">
+            <button onclick="testPush()" style="background:#333; color:#aaa; font-size:10px; padding:6px 10px; border-radius:8px;">ТЕСТ</button>
             <button class="add-btn" onclick="openAdd()">+</button>
         </div>
     </header>
+
     <div class="week-nav">
-        <button class="nav-btn" onclick="moveWeek(-1)">←</button>
-        <div id="month-label" style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px;"></div>
-        <button class="nav-btn" onclick="moveWeek(1)">→</button>
+        <button class="nav-btn" onclick="moveWeek(-1)">❮</button>
+        <div id="month-label" style="text-transform: capitalize; font-weight: bold;"></div>
+        <button class="nav-btn" onclick="moveWeek(1)">❯</button>
     </div>
+
     <div class="days-row" id="days-row"></div>
     <div id="habit-list"></div>
 </div>
 
 <div id="modal" class="modal">
     <div class="modal-content">
-        <input type="text" id="h-name" placeholder="НАЗВАНИЕ">
-        <div style="margin: 20px 0; font-size: 12px; color: var(--gray);">
-            <label><input type="checkbox" id="h-perm"> ЕЖЕДНЕВНО</label>
-        </div>
-        <input type="time" id="h-time" style="color-scheme: dark;">
-        <button class="save-btn" onclick="saveHabit()">СОХРАНИТЬ</button>
-        <button onclick="closeModal()" style="width:100%; margin-top:15px; font-size:10px; color:var(--gray);">ОТМЕНА</button>
+        <h3 style="margin:0 0 15px; color:var(--accent)">Задача</h3>
+        <input type="text" id="h-name" placeholder="Название">
+        <label style="display:flex; align-items:center; gap:8px; font-size:14px; color:var(--gray)">
+            <input type="checkbox" id="h-perm"> Постоянная
+        </label>
+        <input type="time" id="h-time">
+        <button class="save-btn" onclick="saveHabit()">Сохранить</button>
+        <button style="background:none; color:var(--gray); width:100%; margin-top:10px" onclick="closeModal()">Отмена</button>
     </div>
 </div>
 
 <div id="ctx-menu" class="ctx-menu">
-    <div class="menu-item" onclick="startEdit()">ИЗМЕНИТЬ</div>
-    <div class="menu-item" style="color:var(--danger);" onclick="deleteHabit()">УДАЛИТЬ</div>
+    <div class="menu-item" onclick="startEdit()">Изменить</div>
+    <div class="menu-item" style="color:var(--danger); border:none;" onclick="deleteHabit()">Удалить</div>
 </div>
 
 <script>
@@ -83,22 +91,26 @@
         self.addEventListener('install', e => self.skipWaiting());
         self.addEventListener('activate', e => e.waitUntil(clients.claim()));
         self.addEventListener('push', e => {
-            const data = e.data ? e.data.json() : {title: 'Task', body: 'Time to act'};
-            e.waitUntil(self.registration.showNotification(data.title, { body: data.body, vibrate: [100] }));
+            const data = e.data ? e.data.json() : {title: 'Трекер', body: 'Пора выполнить задачу'};
+            e.waitUntil(self.registration.showNotification(data.title, {
+                body: data.body,
+                vibrate: [200, 100, 200],
+                priority: 'high'
+            }));
         });
     `;
     const blob = new Blob([swCode], {type: 'application/javascript'});
     if ('serviceWorker' in navigator) navigator.serviceWorker.register(URL.createObjectURL(blob));
 
-    const DB_KEY = "MINIMAL_V1";
+    const DB_KEY = "HABITS_FINAL_V15";
     let habits = JSON.parse(localStorage.getItem(DB_KEY)) || [];
-    let doneData = JSON.parse(localStorage.getItem("DONE_M1")) || {};
+    let doneData = JSON.parse(localStorage.getItem("DONE_V15")) || {};
     let offset = 0, selected = new Date().toISOString().split('T')[0], editIdx = null;
 
     function checkNotif() {
         if (Notification.permission === "granted") {
             document.getElementById('notif-bar').className = "status-bar status-ok";
-            document.getElementById('notif-bar').innerText = "Push: On";
+            document.getElementById('notif-bar').innerText = "Уведомления активны";
         } else {
             Notification.requestPermission().then(checkNotif);
         }
@@ -106,49 +118,59 @@
 
     function render() {
         const d = new Date(); d.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1) + (offset * 7));
-        document.getElementById('month-label').innerText = d.toLocaleString('ru', { month: 'long' });
+        document.getElementById('month-label').innerText = d.toLocaleString('ru', { month: 'long', year: 'numeric' });
         const row = document.getElementById('days-row'); row.innerHTML = '';
         for (let i = 0; i < 7; i++) {
             let curr = new Date(d); curr.setDate(d.getDate() + i);
             let s = curr.toISOString().split('T')[0];
             row.innerHTML += `<div class="day ${s === selected ? 'selected' : ''}" onclick="selected='${s}';render()">
-                <div style="font-size:10px">${['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'][i]}</div><div class="day-num">${curr.getDate()}</div>
+                <div>${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][i]}</div><div class="day-num">${curr.getDate()}</div>
             </div>`;
         }
         const today = new Date().toISOString().split('T')[0];
         const filtered = habits.filter(h => h.perm || h.date === selected);
-        // УБРАНО сообщение "Задач нет" для максимального минимализма
         document.getElementById('habit-list').innerHTML = filtered.map(h => {
             const id = habits.indexOf(h);
             const isDone = doneData[selected+'_'+id];
             return `<div class="habit-card ${isDone ? 'completed' : ''}">
-                <div style="display:flex;align-items:center;gap:15px;flex:1;cursor:pointer;" onclick="if('${selected}'<='${today}')toggle(${id})">
+                <div style="display:flex;align-items:center;gap:12px;flex:1;cursor:pointer;" onclick="if('${selected}'<='${today}')toggle(${id})">
                     <div class="circle"></div>
-                    <div style="display:flex; flex-direction:column">
-                        <span class="name" style="font-size:15px">${h.name}</span>
-                        <span style="font-size:10px; color:var(--gray); margin-top:3px">${h.time || ''}</span>
+                    <div>
+                        <div class="name">${h.name}</div>
+                        <div style="font-size:11px; color:var(--gray)">${h.time || ''}</div>
                     </div>
                 </div>
-                <div onclick="showMenu(event, ${id})" style="color:var(--gray); cursor:pointer; padding:5px;">⋮</div>
+                <div class="more" onclick="showMenu(event, ${id})">⋮</div>
             </div>`;
         }).join('');
         localStorage.setItem(DB_KEY, JSON.stringify(habits));
-        localStorage.setItem("DONE_M1", JSON.stringify(doneData));
+        localStorage.setItem("DONE_V15", JSON.stringify(doneData));
     }
 
     function testPush() {
         setTimeout(() => {
             if (Notification.permission === 'granted') {
-                navigator.serviceWorker.ready.then(reg => reg.showNotification("Test", { body: "Work" }));
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification("Тест", { body: "Уведомления работают", vibrate: [200, 100, 200] });
+                });
             }
-        }, 2000);
+        }, 3000);
     }
 
     function toggle(id) { doneData[selected+'_'+id] = !doneData[selected+'_'+id]; render(); }
     function moveWeek(n) { offset += n; render(); }
-    function openAdd() { editIdx = null; document.getElementById('h-name').value=''; document.getElementById('modal').style.display='flex'; }
+    function openAdd() { editIdx = null; document.getElementById('h-name').value=''; document.getElementById('h-time').value=''; document.getElementById('modal').style.display='flex'; }
     function closeModal() { document.getElementById('modal').style.display='none'; }
-    function showMenu(e, id) { e.stopPropagation(); editIdx = id; const m = document.getElementById('ctx-menu'); m.style.display='block'; m.style.left=(e.pageX-140)+'px'; m.style.top=e.pageY+'px'; }
+    
+    function showMenu(e, id) { 
+        e.stopPropagation(); 
+        editIdx = id; 
+        const m = document.getElementById('ctx-menu'); 
+        m.style.display='block'; 
+        m.style.left=(e.pageX-140)+'px'; 
+        m.style.top=e.pageY+'px'; 
+    }
+
     function startEdit() { 
         const h = habits[editIdx]; 
         document.getElementById('h-name').value = h.name; 
@@ -157,7 +179,13 @@
         document.getElementById('modal').style.display='flex';
         document.getElementById('ctx-menu').style.display='none';
     }
-    function deleteHabit() { habits.splice(editIdx, 1); render(); document.getElementById('ctx-menu').style.display='none'; }
+
+    function deleteHabit() { 
+        habits.splice(editIdx, 1); 
+        render(); 
+        document.getElementById('ctx-menu').style.display='none'; 
+    }
+
     function saveHabit() {
         const h = { name: document.getElementById('h-name').value, perm: document.getElementById('h-perm').checked, time: document.getElementById('h-time').value, date: selected };
         if (!h.name) return;
@@ -171,192 +199,7 @@
         if (now.getSeconds() === 0) {
             habits.forEach(h => {
                 if (h.time === curT && (h.perm || h.date === now.toISOString().split('T')[0])) {
-                    navigator.serviceWorker.ready.then(reg => reg.showNotification("Time", {body: h.name}));
-                }
-            });
-        }
-    }, 1000);
-
-    window.onclick = () => document.getElementById('ctx-menu').style.display = 'none';
-    checkNotif();
-    render();
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tracker</title>
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlRyYWNrZXIiLAogICJzaG9ydF9uYW1lIjogIlRyYWNrZXIiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzAwMDAwMCIsCiAgInRoZW1lX2NvbG9yIjogIzAwMDAwMAp9">
-    <style>
-        :root { --bg: #000; --card: #121212; --accent: #fff; --text: #fff; --gray: #555; --danger: #ff453a; }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 400px; }
-        
-        .status-bar { font-size: 10px; padding: 5px; margin-bottom: 10px; text-align: center; width: 100%; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
-        .status-ok { color: #28a745; opacity: 0.5; }
-        .status-err { color: var(--danger); }
-
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .week-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 10px; }
-        .nav-btn { background: none; border: none; color: var(--text); font-size: 18px; cursor: pointer; padding: 5px; }
-        
-        .days-row { display: flex; justify-content: space-between; margin-bottom: 25px; }
-        .day { text-align: center; color: var(--gray); cursor: pointer; flex: 1; }
-        .day.selected { color: var(--accent); }
-        .day-num { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 5px auto 0; font-size: 14px; }
-        .selected .day-num { background: var(--text); color: #000; }
-
-        .habit-card { background: var(--card); margin-bottom: 2px; padding: 18px; display: flex; align-items: center; justify-content: space-between; }
-        .circle { width: 20px; height: 20px; border: 1px solid #333; border-radius: 20%; cursor: pointer; }
-        .completed .circle { background: var(--accent); border-color: var(--accent); }
-        .completed .name { color: var(--gray); text-decoration: line-through; }
-        
-        .modal { display: none; position: fixed; inset: 0; background: #000; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { width: 100%; max-width: 300px; padding: 20px; }
-        input { width: 100%; padding: 15px 0; background: transparent; border: none; border-bottom: 1px solid #333; color: white; margin: 10px 0; font-size: 16px; outline: none; }
-        
-        button { cursor: pointer; border: none; background: none; color: var(--text); font-family: inherit; }
-        .add-btn { font-size: 28px; line-height: 1; }
-        .save-btn { width: 100%; padding: 15px; border: 1px solid #333; margin-top: 20px; text-transform: uppercase; font-size: 12px; letter-spacing: 2px; }
-        
-        .ctx-menu { display: none; position: fixed; background: #111; border: 1px solid #222; z-index: 2000; min-width: 150px; }
-        .menu-item { padding: 15px; color: white; cursor: pointer; border-bottom: 1px solid #222; font-size: 13px; text-transform: uppercase; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div id="notif-bar" class="status-bar status-err" onclick="checkNotif()">Push: Off</div>
-    <header>
-        <h1 style="font-size: 20px; margin: 0; font-weight: 400; text-transform: uppercase; letter-spacing: 2px;">Задачи</h1>
-        <div style="display:flex; gap:15px; align-items:center;">
-            <button onclick="testPush()" style="font-size: 10px; color: var(--gray);">Test</button>
-            <button class="add-btn" onclick="openAdd()">+</button>
-        </div>
-    </header>
-    <div class="week-nav">
-        <button class="nav-btn" onclick="moveWeek(-1)">←</button>
-        <div id="month-label" style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px;"></div>
-        <button class="nav-btn" onclick="moveWeek(1)">→</button>
-    </div>
-    <div class="days-row" id="days-row"></div>
-    <div id="habit-list"></div>
-</div>
-
-<div id="modal" class="modal">
-    <div class="modal-content">
-        <input type="text" id="h-name" placeholder="НАЗВАНИЕ">
-        <div style="margin: 20px 0; font-size: 12px; color: var(--gray);">
-            <label><input type="checkbox" id="h-perm"> ЕЖЕДНЕВНО</label>
-        </div>
-        <input type="time" id="h-time" style="color-scheme: dark;">
-        <button class="save-btn" onclick="saveHabit()">СОХРАНИТЬ</button>
-        <button onclick="closeModal()" style="width:100%; margin-top:15px; font-size:10px; color:var(--gray);">ОТМЕНА</button>
-    </div>
-</div>
-
-<div id="ctx-menu" class="ctx-menu">
-    <div class="menu-item" onclick="startEdit()">ИЗМЕНИТЬ</div>
-    <div class="menu-item" style="color:var(--danger);" onclick="deleteHabit()">УДАЛИТЬ</div>
-</div>
-
-<script>
-    const swCode = `
-        self.addEventListener('install', e => self.skipWaiting());
-        self.addEventListener('activate', e => e.waitUntil(clients.claim()));
-        self.addEventListener('push', e => {
-            const data = e.data ? e.data.json() : {title: 'Task', body: 'Time to act'};
-            e.waitUntil(self.registration.showNotification(data.title, { body: data.body, vibrate: [100] }));
-        });
-    `;
-    const blob = new Blob([swCode], {type: 'application/javascript'});
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register(URL.createObjectURL(blob));
-
-    const DB_KEY = "MINIMAL_V1";
-    let habits = JSON.parse(localStorage.getItem(DB_KEY)) || [];
-    let doneData = JSON.parse(localStorage.getItem("DONE_M1")) || {};
-    let offset = 0, selected = new Date().toISOString().split('T')[0], editIdx = null;
-
-    function checkNotif() {
-        if (Notification.permission === "granted") {
-            document.getElementById('notif-bar').className = "status-bar status-ok";
-            document.getElementById('notif-bar').innerText = "Push: On";
-        } else {
-            Notification.requestPermission().then(checkNotif);
-        }
-    }
-
-    function render() {
-        const d = new Date(); d.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1) + (offset * 7));
-        document.getElementById('month-label').innerText = d.toLocaleString('ru', { month: 'long' });
-        const row = document.getElementById('days-row'); row.innerHTML = '';
-        for (let i = 0; i < 7; i++) {
-            let curr = new Date(d); curr.setDate(d.getDate() + i);
-            let s = curr.toISOString().split('T')[0];
-            row.innerHTML += `<div class="day ${s === selected ? 'selected' : ''}" onclick="selected='${s}';render()">
-                <div style="font-size:10px">${['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'][i]}</div><div class="day-num">${curr.getDate()}</div>
-            </div>`;
-        }
-        const today = new Date().toISOString().split('T')[0];
-        const filtered = habits.filter(h => h.perm || h.date === selected);
-        // УБРАНО сообщение "Задач нет" для максимального минимализма
-        document.getElementById('habit-list').innerHTML = filtered.map(h => {
-            const id = habits.indexOf(h);
-            const isDone = doneData[selected+'_'+id];
-            return `<div class="habit-card ${isDone ? 'completed' : ''}">
-                <div style="display:flex;align-items:center;gap:15px;flex:1;cursor:pointer;" onclick="if('${selected}'<='${today}')toggle(${id})">
-                    <div class="circle"></div>
-                    <div style="display:flex; flex-direction:column">
-                        <span class="name" style="font-size:15px">${h.name}</span>
-                        <span style="font-size:10px; color:var(--gray); margin-top:3px">${h.time || ''}</span>
-                    </div>
-                </div>
-                <div onclick="showMenu(event, ${id})" style="color:var(--gray); cursor:pointer; padding:5px;">⋮</div>
-            </div>`;
-        }).join('');
-        localStorage.setItem(DB_KEY, JSON.stringify(habits));
-        localStorage.setItem("DONE_M1", JSON.stringify(doneData));
-    }
-
-    function testPush() {
-        setTimeout(() => {
-            if (Notification.permission === 'granted') {
-                navigator.serviceWorker.ready.then(reg => reg.showNotification("Test", { body: "Work" }));
-            }
-        }, 2000);
-    }
-
-    function toggle(id) { doneData[selected+'_'+id] = !doneData[selected+'_'+id]; render(); }
-    function moveWeek(n) { offset += n; render(); }
-    function openAdd() { editIdx = null; document.getElementById('h-name').value=''; document.getElementById('modal').style.display='flex'; }
-    function closeModal() { document.getElementById('modal').style.display='none'; }
-    function showMenu(e, id) { e.stopPropagation(); editIdx = id; const m = document.getElementById('ctx-menu'); m.style.display='block'; m.style.left=(e.pageX-140)+'px'; m.style.top=e.pageY+'px'; }
-    function startEdit() { 
-        const h = habits[editIdx]; 
-        document.getElementById('h-name').value = h.name; 
-        document.getElementById('h-perm').checked = h.perm; 
-        document.getElementById('h-time').value = h.time || ''; 
-        document.getElementById('modal').style.display='flex';
-        document.getElementById('ctx-menu').style.display='none';
-    }
-    function deleteHabit() { habits.splice(editIdx, 1); render(); document.getElementById('ctx-menu').style.display='none'; }
-    function saveHabit() {
-        const h = { name: document.getElementById('h-name').value, perm: document.getElementById('h-perm').checked, time: document.getElementById('h-time').value, date: selected };
-        if (!h.name) return;
-        if (editIdx !== null) habits[editIdx] = h; else habits.push(h);
-        closeModal(); render();
-    }
-
-    setInterval(() => {
-        const now = new Date();
-        const curT = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        if (now.getSeconds() === 0) {
-            habits.forEach(h => {
-                if (h.time === curT && (h.perm || h.date === now.toISOString().split('T')[0])) {
-                    navigator.serviceWorker.ready.then(reg => reg.showNotification("Time", {body: h.name}));
+                    navigator.serviceWorker.ready.then(reg => reg.showNotification("Пора!", {body: h.name}));
                 }
             });
         }
