@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Habit Tracker Gold</title>
+    <title>Habit Tracker Last Fix</title>
     <style>
         :root { --bg: #000; --card: #1C1C1E; --accent: #0A84FF; --text: #fff; --gray: #8E8E93; --danger: #FF453A; }
         body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .container { width: 100%; max-width: 400px; }
         
-        .status-bar { font-size: 11px; padding: 8px; border-radius: 10px; margin-bottom: 15px; text-align: center; width: 100%; cursor: pointer; }
-        .status-ok { background: #28a74522; color: #28a745; border: 1px solid #28a74544; }
-        .status-err { background: #ff950022; color: #ff9500; border: 1px solid #ff950044; }
+        .status-bar { font-size: 11px; padding: 10px; border-radius: 12px; margin-bottom: 15px; text-align: center; width: 100%; box-sizing: border-box; }
+        .status-ok { background: #28a74522; color: #28a745; }
+        .status-err { background: #ff950022; color: #ff9500; cursor: pointer; }
 
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; width: 100%; }
-        .week-nav { display: flex; align-items: center; justify-content: space-between; background: var(--card); border-radius: 15px; padding: 8px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
+        .week-nav { display: flex; align-items: center; justify-content: space-between; background: var(--card); border-radius: 15px; padding: 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
         .nav-btn { background: none; border: none; color: var(--accent); font-size: 20px; cursor: pointer; }
         
         .days-row { display: flex; justify-content: space-between; background: var(--card); padding: 12px; border-radius: 18px; margin-bottom: 20px; width: 100%; box-sizing: border-box; }
@@ -32,31 +32,34 @@
 
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
         .modal-content { background: #2C2C2E; padding: 25px; border-radius: 25px; width: 100%; max-width: 300px; }
-        input { width: 100%; padding: 12px; background: #3A3A3C; border: none; border-radius: 10px; color: white; margin: 10px 0; box-sizing: border-box; font-size: 16px; }
+        input { width: 100%; padding: 12px; background: #3A3A3C; border: none; border-radius: 10px; color: white; margin: 10px 0; box-sizing: border-box; font-size: 16px; outline: none; }
         
         button { cursor: pointer; border: none; font-weight: 600; }
-        .add-btn { background: var(--accent); color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; }
-        .save-btn { background: var(--accent); color: white; width: 100%; padding: 12px; border-radius: 12px; margin-top: 10px; }
+        .add-btn { background: var(--accent); color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; display: flex; align-items: center; justify-content: center; }
+        .save-btn { background: var(--accent); color: white; width: 100%; padding: 14px; border-radius: 12px; margin-top: 10px; }
         
         .ctx-menu { display: none; position: fixed; background: #2C2C2E; border-radius: 12px; border: 1px solid #3A3A3C; z-index: 2000; min-width: 140px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .menu-item { padding: 12px 16px; color: white; cursor: pointer; border-bottom: 1px solid #3A3A3C; }
     </style>
 </head>
-<body onclick="enableAudio()">
+<body>
 
 <div class="container">
     <div id="notif-bar" class="status-bar status-err" onclick="checkNotif()">
-        Нажми сюда, чтобы разрешить уведомления
+        Проверка уведомлений...
     </div>
 
     <header>
-        <h1 style="font-size: 24px;">Привычки</h1>
-        <button class="add-btn" onclick="openAdd()">+</button>
+        <h1 style="font-size: 24px; margin: 0;">Мой день</h1>
+        <div style="display:flex; gap:8px;">
+            <button onclick="testIn5Sec()" style="background:#333; color:#fff; font-size:10px; padding:5px; border-radius:5px;">ТЕСТ (5сек)</button>
+            <button class="add-btn" onclick="openAdd()">+</button>
+        </div>
     </header>
 
     <div class="week-nav">
         <button class="nav-btn" onclick="moveWeek(-1)">❮</button>
-        <div id="month-label"></div>
+        <div id="month-label" style="text-transform: capitalize; font-weight: bold;"></div>
         <button class="nav-btn" onclick="moveWeek(1)">❯</button>
     </div>
 
@@ -68,12 +71,12 @@
     <div class="modal-content">
         <h3 id="modal-title" style="margin:0 0 10px">Привычка</h3>
         <input type="text" id="h-name" placeholder="Название">
-        <label style="display:flex; align-items:center; gap:8px; font-size:14px; color:var(--gray)">
+        <label style="display:flex; align-items:center; gap:8px; font-size:14px; color:var(--gray); cursor:pointer;">
             <input type="checkbox" id="h-perm"> Постоянная
         </label>
         <input type="time" id="h-time">
         <button class="save-btn" onclick="saveHabit()">Сохранить</button>
-        <button style="background:none; color:var(--gray); width:100%; margin-top:10px" onclick="closeModal()">Отмена</button>
+        <button style="background:none; color:var(--gray); width:100%; margin-top:10px; cursor:pointer;" onclick="closeModal()">Отмена</button>
     </div>
 </div>
 
@@ -83,27 +86,43 @@
 </div>
 
 <script>
-    // 1. ПРАВИЛЬНЫЙ SERVICE WORKER
+    // 1. РЕГИСТРАЦИЯ SERVICE WORKER (Прямо из строки кода)
+    const swCode = `
+        self.addEventListener('install', e => self.skipWaiting());
+        self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+        self.addEventListener('notificationclick', e => { e.notification.close(); e.waitUntil(clients.openWindow('/')); });
+    `;
+    const blob = new Blob([swCode], {type: 'application/javascript'});
+    const swUrl = URL.createObjectURL(blob);
+
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('data:application/javascript,' + encodeURIComponent(`
-            self.addEventListener('install', e => self.skipWaiting());
-            self.addEventListener('activate', e => e.waitUntil(clients.claim()));
-        `));
+        navigator.serviceWorker.register(swUrl);
     }
 
-    const DB_KEY = "HABITS_GOLD_V10";
+    const DB_KEY = "HABITS_V11";
     let habits = JSON.parse(localStorage.getItem(DB_KEY)) || [];
-    let doneData = JSON.parse(localStorage.getItem("DONE_GOLD_V10")) || {};
+    let doneData = JSON.parse(localStorage.getItem("DONE_V11")) || {};
     let offset = 0, selected = new Date().toISOString().split('T')[0], editIdx = null;
 
     function checkNotif() {
-        Notification.requestPermission().then(perm => {
-            const bar = document.getElementById('notif-bar');
-            if(perm === 'granted') {
-                bar.innerText = "Уведомления работают ✓";
-                bar.className = "status-bar status-ok";
-            }
-        });
+        if (!("Notification" in window)) {
+            updateBar("Браузер не поддерживает уведомления", "status-err");
+            return;
+        }
+        if (Notification.permission === "granted") {
+            updateBar("Уведомления включены ✓", "status-ok");
+        } else {
+            Notification.requestPermission().then(p => {
+                if(p === "granted") updateBar("Уведомления включены ✓", "status-ok");
+                else updateBar("Нажми, чтобы разрешить уведомления", "status-err");
+            });
+        }
+    }
+
+    function updateBar(text, cls) {
+        const bar = document.getElementById('notif-bar');
+        bar.innerText = text;
+        bar.className = "status-bar " + cls;
     }
 
     function render() {
@@ -125,58 +144,57 @@
             const id = habits.indexOf(h);
             const isDone = doneData[selected+'_'+id];
             return `<div class="habit-card ${isDone ? 'completed' : ''}">
-                <div style="display:flex;align-items:center;gap:12px;flex:1" onclick="if('${selected}'<='${today}')toggle(${id})">
-                    <div class="circle"></div><span class="name">${h.name}</span>
+                <div style="display:flex;align-items:center;gap:12px;flex:1;cursor:pointer;" onclick="if('${selected}'<='${today}')toggle(${id})">
+                    <div class="circle"></div>
+                    <div style="display:flex; flex-direction:column;">
+                        <span class="name">${h.name}</span>
+                        <span style="font-size:10px; color:var(--gray)">${h.time || 'Без времени'}</span>
+                    </div>
                 </div>
                 <div class="more" onclick="showMenu(event, ${id})">•••</div>
             </div>`;
         }).join('');
         
         localStorage.setItem(DB_KEY, JSON.stringify(habits));
-        localStorage.setItem("DONE_GOLD_V10", JSON.stringify(doneData));
+        localStorage.setItem("DONE_V11", JSON.stringify(doneData));
+    }
+
+    function testIn5Sec() {
+        alert("Уведомление придет через 5 секунд. Сверни браузер или заблокируй экран!");
+        setTimeout(() => {
+            sendPush("Тест работы", "Если ты это видишь, значит всё настроено верно!");
+        }, 5000);
+    }
+
+    function sendPush(title, body) {
+        if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(reg => {
+                reg.showNotification(title, {
+                    body: body,
+                    icon: 'https://cdn-icons-png.flaticon.com/512/1067/1067530.png',
+                    vibrate: [200, 100, 200],
+                    badge: 'https://cdn-icons-png.flaticon.com/512/1067/1067530.png'
+                });
+            });
+        }
     }
 
     function toggle(id) { doneData[selected+'_'+id] = !doneData[selected+'_'+id]; render(); }
     function moveWeek(n) { offset += n; render(); }
-    
     function openAdd() { editIdx = null; document.getElementById('h-name').value=''; document.getElementById('h-perm').checked=false; document.getElementById('h-time').value=''; document.getElementById('modal').style.display='flex'; }
     function closeModal() { document.getElementById('modal').style.display='none'; }
-
-    function showMenu(e, id) {
-        e.stopPropagation();
-        editIdx = id;
-        const m = document.getElementById('ctx-menu');
-        m.style.display = 'block';
-        m.style.left = (e.pageX - 130) + 'px';
-        m.style.top = e.pageY + 'px';
-    }
-
-    function startEdit() {
-        const h = habits[editIdx];
-        document.getElementById('h-name').value = h.name;
-        document.getElementById('h-perm').checked = h.perm;
-        document.getElementById('h-time').value = h.time || '';
-        document.getElementById('modal').style.display = 'flex';
-        document.getElementById('ctx-menu').style.display = 'none';
-    }
-
-    function deleteHabit() {
-        habits.splice(editIdx, 1);
-        render();
-        document.getElementById('ctx-menu').style.display = 'none';
-    }
+    function showMenu(e, id) { e.stopPropagation(); editIdx = id; const m = document.getElementById('ctx-menu'); m.style.display='block'; m.style.left=(e.pageX-130)+'px'; m.style.top=e.pageY+'px'; }
+    function startEdit() { const h=habits[editIdx]; document.getElementById('h-name').value=h.name; document.getElementById('h-perm').checked=h.perm; document.getElementById('h-time').value=h.time||''; document.getElementById('modal').style.display='flex'; document.getElementById('ctx-menu').style.display='none'; }
+    function deleteHabit() { habits.splice(editIdx, 1); render(); document.getElementById('ctx-menu').style.display='none'; }
 
     function saveHabit() {
         const h = { name: document.getElementById('h-name').value, perm: document.getElementById('h-perm').checked, time: document.getElementById('h-time').value, date: selected };
         if (!h.name) return;
-        if (editIdx !== null) habits[editIdx] = h;
-        else habits.push(h);
+        if (editIdx !== null) habits[editIdx] = h; else habits.push(h);
         closeModal(); render();
     }
 
-    function enableAudio() { document.getElementById('ctx-menu').style.display = 'none'; }
-
-    // УВЕДОМЛЕНИЯ ЧЕРЕЗ РЕГИСТРАЦИЮ (Для мобильных)
+    // Основной цикл проверки времени
     setInterval(() => {
         const now = new Date();
         const curT = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
@@ -184,19 +202,12 @@
 
         habits.forEach(h => {
             if (h.time === curT && (h.perm || h.date === now.toISOString().split('T')[0])) {
-                if ('serviceWorker' in navigator && Notification.permission === 'granted') {
-                    navigator.serviceWorker.ready.then(reg => {
-                        reg.showNotification("Пора выполнить!", {
-                            body: h.name,
-                            icon: 'https://cdn-icons-png.flaticon.com/512/1067/1067530.png',
-                            badge: 'https://cdn-icons-png.flaticon.com/512/1067/1067530.png'
-                        });
-                    });
-                }
+                sendPush("Пора выполнить!", h.name);
             }
         });
     }, 1000);
 
+    window.onclick = () => document.getElementById('ctx-menu').style.display = 'none';
     checkNotif();
     render();
 </script>
