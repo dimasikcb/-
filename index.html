@@ -19,90 +19,54 @@
             background: var(--bg); 
             color: var(--text); 
             font-family: -apple-system, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            height: 100%;
-            overflow: hidden;
-            overscroll-behavior: none; 
+            margin: 0; padding: 0; 
+            height: 100%; overflow: hidden; overscroll-behavior: none; 
         }
 
-        body { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 15px; 
-            box-sizing: border-box;
-        }
-
-        .container { 
-            width: 100%; 
-            max-width: 400px; 
-            display: flex; 
-            flex-direction: column;
-            height: 100%;
-        }
+        body { display: flex; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; }
+        .container { width: 100%; max-width: 400px; display: flex; flex-direction: column; height: 100%; position: relative; }
         
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; width: 100%; flex-shrink: 0; }
         
-        .header-btns { display: flex; align-items: center; gap: 15px; }
-
-        .today-btn { 
-            background: #1C1C1E; 
-            color: var(--accent); 
-            padding: 8px 14px; 
-            border-radius: 10px; 
+        /* Плавающая кнопка СЕГОДНЯ */
+        .today-fab { 
+            position: absolute; 
+            right: 10px; 
+            bottom: 80px; 
+            background: var(--accent); 
+            color: #fff; 
+            border: none; 
+            border-radius: 30px; 
+            padding: 12px 20px; 
             font-size: 13px; 
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-weight: bold; 
+            text-transform: uppercase; 
+            box-shadow: 0 4px 15px rgba(10, 132, 255, 0.3);
+            z-index: 100;
+            transition: opacity 0.3s, transform 0.3s;
+            display: none; /* Управляется через JS */
+            opacity: 0;
+            transform: translateY(20px);
         }
+        .today-fab.visible { display: block; opacity: 1; transform: translateY(0); }
 
         .week-nav { 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            background: var(--card); 
-            border-radius: 15px; 
-            padding: 10px; 
-            margin-bottom: 10px; 
-            width: 100%; 
-            box-sizing: border-box; 
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-between; background: var(--card); 
+            border-radius: 15px; padding: 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box; flex-shrink: 0; 
         }
-
         .nav-btn { background: none; border: none; color: var(--accent); font-size: 20px; cursor: pointer; }
         
         .days-row { 
-            display: flex; 
-            justify-content: space-between; 
-            background: var(--card); 
-            padding: 12px; 
-            border-radius: 18px; 
-            margin-bottom: 20px; 
-            width: 100%; 
-            box-sizing: border-box; 
-            flex-shrink: 0;
+            display: flex; justify-content: space-between; background: var(--card); padding: 12px; 
+            border-radius: 18px; margin-bottom: 20px; width: 100%; box-sizing: border-box; flex-shrink: 0; 
         }
-
         .day { text-align: center; color: var(--gray); cursor: pointer; flex: 1; }
         .day.selected { color: var(--accent); font-weight: bold; }
         .day-num { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 5px auto 0; }
         .selected .day-num { background: var(--accent); color: white; }
 
-        #swipe-area {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            touch-action: pan-y;
-            transition: transform 0.2s ease-out;
-        }
-
-        #habit-list { 
-            flex-grow: 1; 
-            overflow-y: auto; 
-            padding-bottom: 20px;
-            scrollbar-width: none;
-        }
+        #swipe-area { flex-grow: 1; display: flex; flex-direction: column; width: 100%; touch-action: pan-y; }
+        #habit-list { flex-grow: 1; overflow-y: auto; padding-bottom: 20px; scrollbar-width: none; }
         #habit-list::-webkit-scrollbar { display: none; }
 
         .habit-card { background: var(--card); margin-bottom: 10px; padding: 16px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; }
@@ -129,10 +93,7 @@
 <div class="container">
     <header>
         <h1 style="font-size: 24px; margin: 0;">Трекер</h1>
-        <div class="header-btns">
-            <button class="today-btn" onclick="goToToday()">Сегодня</button>
-            <button class="add-btn" onclick="openAdd()">+</button>
-        </div>
+        <button class="add-btn" onclick="openAdd()">+</button>
     </header>
 
     <div class="week-nav">
@@ -146,6 +107,8 @@
     <div id="swipe-area">
         <div id="habit-list"></div>
     </div>
+
+    <button id="today-fab" class="today-fab" onclick="goToToday()">Сегодня</button>
 </div>
 
 <div id="modal" class="modal">
@@ -167,12 +130,22 @@
 </div>
 
 <script>
-    const DB_KEY = "HABITS_FINAL_V19";
+    const DB_KEY = "HABITS_FINAL_V20";
     let habits = JSON.parse(localStorage.getItem(DB_KEY)) || [];
-    let doneData = JSON.parse(localStorage.getItem("DONE_V19")) || {};
+    let doneData = JSON.parse(localStorage.getItem("DONE_V20")) || {};
     let offset = 0, selected = new Date().toISOString().split('T')[0], editIdx = null;
 
     function render() {
+        const todayReal = new Date().toISOString().split('T')[0];
+        
+        // Управление видимостью кнопки "Сегодня"
+        const fab = document.getElementById('today-fab');
+        if (selected !== todayReal) {
+            fab.classList.add('visible');
+        } else {
+            fab.classList.remove('visible');
+        }
+
         const d = new Date(); d.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1) + (offset * 7));
         document.getElementById('month-label').innerText = d.toLocaleString('ru', { month: 'long', year: 'numeric' });
         const row = document.getElementById('days-row'); row.innerHTML = '';
@@ -183,13 +156,13 @@
                 <div>${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][i]}</div><div class="day-num">${curr.getDate()}</div>
             </div>`;
         }
-        const todayStr = new Date().toISOString().split('T')[0];
+        
         const filtered = habits.filter(h => h.perm || h.date === selected);
         document.getElementById('habit-list').innerHTML = filtered.map(h => {
             const id = habits.indexOf(h);
             const isDone = doneData[selected+'_'+id];
             return `<div class="habit-card ${isDone ? 'completed' : ''}">
-                <div style="display:flex;align-items:center;gap:12px;flex:1;cursor:pointer;" onclick="if('${selected}'<='${todayStr}')toggle(${id})">
+                <div style="display:flex;align-items:center;gap:12px;flex:1;cursor:pointer;" onclick="if('${selected}'<='${todayReal}')toggle(${id})">
                     <div class="circle"></div>
                     <div>
                         <div class="name">${h.name}</div>
@@ -200,7 +173,7 @@
             </div>`;
         }).join('');
         localStorage.setItem(DB_KEY, JSON.stringify(habits));
-        localStorage.setItem("DONE_V19", JSON.stringify(doneData));
+        localStorage.setItem("DONE_V20", JSON.stringify(doneData));
     }
 
     function goToToday() {
@@ -213,14 +186,8 @@
     let touchEndX = 0;
     const swipeArea = document.getElementById('swipe-area');
 
-    swipeArea.addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].screenX;
-    }, false);
-
-    swipeArea.addEventListener('touchend', e => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    }, false);
+    swipeArea.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
+    swipeArea.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, false);
 
     function handleSwipe() {
         const threshold = 50;
